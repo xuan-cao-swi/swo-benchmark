@@ -1,0 +1,34 @@
+{
+  "port": 8181,
+  "settingsLocation": "settings.db",
+  "defaultCollectors": [
+    {
+      "protocol": "grpc",
+      "port": 12224,
+      "messageOverhead": 0,
+      "queueCapacity": 25000,
+      "responseDelay": 0,
+      "uptimeFactor": 1,
+      "uptimeInterval": 100,
+      "defaultResultCode": "OK",
+      "rejectionResultCode": "TRY_LATER",
+      "output": {
+        "console": {
+          "EVENT": {
+            "printHostId": true,
+            "printServiceName": true,
+            "reportXTraceId": false
+          },
+          "METRIC": {
+            "printHostId": true,
+            "printServiceName": true
+          },
+          "STATUS": {
+            "printHostId": true,
+            "printServiceName": true
+          }
+        }
+      }
+    }
+  ]
+}

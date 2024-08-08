@@ -1,0 +1,20 @@
+.DS_Store
+.env
+.packagecloud
+star.appoptics.com.issuer.crt
+
+# act
+act.secrets
+my.input
+my.input.json
+
+# local setup app
+sample-rails-2/
+
+# sinatra-sample-2
+sinatra-sample-2/Gemfile.lock
+sinatra-sample-2/apm.collector.st-ssp.solarwinds.com
+
+# python venv
+locust-benckmark/
+__pycache__/

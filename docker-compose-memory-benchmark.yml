@@ -1,0 +1,65 @@
+services:
+  swo_ruby_apm_on:
+    image: swo_ruby_apm_benchmark:latest
+    build:
+      context: ./benchmark
+      dockerfile: Dockerfile
+    container_name: swo_ruby_apm_benchmark_on-1
+    restart: "no"
+    ports:
+      - 8002:8002
+    environment:
+      - SW_APM_COLLECTOR=java-collector:12224
+      - SW_APM_TRUSTEDPATH=/var/app/learn-rails/server-grpc.crt
+    volumes:
+      - ./java-collector/server-grpc.crt:/var/app/learn-rails/server-grpc.crt
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 500m
+
+  swo_ruby_apm_off:
+    image: swo_ruby_apm_benchmark:latest
+    build:
+      context: ./benchmark
+      dockerfile: Dockerfile
+    container_name: swo_ruby_apm_benchmark_off-2
+    restart: "no"
+    ports:
+      - 8003:8002
+    environment:
+      - SW_APM_COLLECTOR=java-collector:12224
+      - SW_APM_TRUSTEDPATH=/var/app/learn-rails/server-grpc.crt
+      - SW_APM_ENABLED=false
+    volumes:
+      - ./java-collector/server-grpc.crt:/var/app/learn-rails/server-grpc.crt
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 500m
+
+  sample_app_holder:
+    image: ubuntu:latest
+    command: tail -f /dev/null
+    container_name: benchmark-app-holder
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  java-collector:
+    image: "traceqa/test-collector:java-collector"
+    container_name: java-collector
+    volumes:
+      - ./java-collector/settings-benchmark.db:/settings.db
+      - ./java-collector/server-grpc.pem:/server-grpc.pem
+      - ./java-collector/server-grpc.crt:/server-grpc.crt
+      - ./java-collector/config-proxy-ao-benchmark.json:/config.json
+    ports:
+      - 8181:8181
+      - 12224:12224
+    command: java -jar apm-agent-test-collector.jar
+
