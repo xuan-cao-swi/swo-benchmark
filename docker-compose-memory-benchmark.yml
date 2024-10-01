@@ -17,7 +17,7 @@ services:
       resources:
         limits:
           cpus: '1'
-          memory: 500m
+          memory: 1G
 
   swo_ruby_apm_off:
     image: swo_ruby_apm_benchmark:latest
@@ -38,7 +38,7 @@ services:
       resources:
         limits:
           cpus: '1'
-          memory: 500m
+          memory: 1G
 
   sample_app_holder:
     image: ubuntu:latest

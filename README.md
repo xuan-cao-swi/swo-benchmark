@@ -35,8 +35,7 @@ It's recommended to run in host machine because you can see the graph
 
 Install Locust
 ```sh
-apt-get install python3-pip
-apt-get install python3.12-venv
+apt-get update && apt-get install python3-pip python3.12-venv vim
 
 # create python virtual env
 python3 -m venv locustenv

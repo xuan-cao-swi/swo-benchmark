@@ -6,6 +6,25 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+module LearnRailsApp
+  module JavaCollector
+    def sanitize_collector_uri(uri)
+      if ENV['SW_APM_COLLECTOR']
+        ENV['SW_APM_COLLECTOR']
+      else
+        super(uri)
+      end
+    end
+  end
+end
+
+if ENV['SW_APM_COLLECTOR'] =~ /java-collector:\d+/
+  require 'solarwinds_apm/oboe_init_options'
+  SolarWindsAPM::OboeInitOptions.prepend(LearnRailsApp::JavaCollector) if defined?(SolarWindsAPM::OboeInitOptions)
+end
+
+require 'solarwinds_apm'
+
 SecureHeaders::Configuration.default if defined?(SecureHeaders)
 
 module LearnRails
