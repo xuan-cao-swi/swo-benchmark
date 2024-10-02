@@ -18,3 +18,8 @@ sinatra-sample-2/apm.collector.st-ssp.solarwinds.com
 # python venv
 locust-benckmark/
 __pycache__/
+locustenv/
+
+# image
+*.png
+*.txt
