@@ -6,6 +6,7 @@ class WebsiteOneUser(HttpUser):
     def load_test_website_one(self):
         self.client.get("http://0.0.0.0:8002/", name="with_apm")
         self.client.get("http://0.0.0.0:8003/", name="without_apm")
+        self.client.get("http://0.0.0.0:8004/", name="with_otlp_apm")
 
 # https://docs.locust.io/en/stable/running-without-web-ui.html
 # locust --headless -u 100 --run-time 60 --host http://0.0.0.0:8002 # default unit is seconds

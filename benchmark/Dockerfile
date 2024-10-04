@@ -28,6 +28,8 @@ WORKDIR /var/app/learn-rails
 
 RUN bundle install
 
+COPY otel_config.rb /usr/local/bundle/gems/solarwinds_apm-6.1.0/lib/solarwinds_apm/
+
 EXPOSE 8002
 
 CMD ["rails", "server", "-b", "0.0.0.0", "-p", "8002"]

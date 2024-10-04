@@ -23,7 +23,20 @@ if ENV['SW_APM_COLLECTOR'] =~ /java-collector:\d+/
   SolarWindsAPM::OboeInitOptions.prepend(LearnRailsApp::JavaCollector) if defined?(SolarWindsAPM::OboeInitOptions)
 end
 
+module OverWriteMetrics
+  def record_sampling_metrics
+    @metrics[:tracecount].add(rand(1..10))
+    @metrics[:samplecount].add(rand(1..10))
+    @metrics[:request_count].add(rand(1..10))
+    @metrics[:toex_count].add(rand(1..10))
+    @metrics[:through_count].add(rand(1..10))
+    @metrics[:tt_count].add(rand(1..10))
+  end
+end
+
 require 'solarwinds_apm'
+
+SolarWindsAPM::OpenTelemetry::OTLPProcessor.prepend(OverWriteMetrics) if defined? (::SolarWindsAPM::OpenTelemetry)
 
 SecureHeaders::Configuration.default if defined?(SecureHeaders)
 

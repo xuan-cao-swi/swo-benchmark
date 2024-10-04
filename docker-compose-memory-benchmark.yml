@@ -18,6 +18,36 @@ services:
         limits:
           cpus: '1'
           memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  swo_ruby_apm_otlp_on:
+    image: swo_ruby_apm_benchmark:latest
+    build:
+      context: ./benchmark
+      dockerfile: Dockerfile
+    container_name: swo_ruby_apm_benchmark_otlp_on-1
+    restart: "no"
+    ports:
+      - 8004:8002
+    environment:
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
+      - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otel-collector:4318/v1/metrics
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318 # this will serve for metrics as well
+      - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true
+      - SW_APM_REPORTER=file
+      - OTLP_MODE_ON=true
+    volumes:
+      - ./java-collector/server-grpc.crt:/var/app/learn-rails/server-grpc.crt
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
 
   swo_ruby_apm_off:
     image: swo_ruby_apm_benchmark:latest
@@ -39,6 +69,9 @@ services:
         limits:
           cpus: '1'
           memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
 
   sample_app_holder:
     image: ubuntu:latest
@@ -49,6 +82,9 @@ services:
         limits:
           cpus: '1'
           memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
   java-collector:
     image: "traceqa/test-collector:java-collector"
@@ -62,4 +98,35 @@ services:
       - 8181:8181
       - 12224:12224
     command: java -jar apm-agent-test-collector.jar
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
 
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    logging:
+      options:
+        max-file: '1'
+        max-size: 100m
+        mode: non-blocking
+        max-buffer-size: 5m
+    container_name: otel-collector
+    ports:
+      - "4327:4317" # grpc (4327 is for 0.0.0.0:4327; 4317 is for otel-collector:4317)
+      - "4328:4318" # http
+    volumes:
+      - ./otel-collector/otel-collector-config-2.yaml:/etc/otel-collector-config.yaml
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
