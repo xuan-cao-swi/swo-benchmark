@@ -28,11 +28,11 @@ WORKDIR /var/app/learn-rails
 
 RUN bundle install
 
+# otel_config.rb branch off either OTLP_MODE_ON true or false
 COPY otel_config.rb /usr/local/bundle/gems/solarwinds_apm-6.1.0/lib/solarwinds_apm/
 
 EXPOSE 8002
 
 CMD ["rails", "server", "-b", "0.0.0.0", "-p", "8002"]
-
-# rails server -b 0.0.0.0 -p 8002
 # CMD ["tail", "-f", "/dev/null"]
+# rails server -b 0.0.0.0 -p 8002

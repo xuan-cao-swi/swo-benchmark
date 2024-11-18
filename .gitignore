@@ -22,4 +22,5 @@ locustenv/
 
 # image
 *.png
-*.txt
+docker_stats_off.txt
+docker_stats_on.txt

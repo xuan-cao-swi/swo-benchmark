@@ -1,0 +1,105 @@
+services:
+  swo_ruby_apm_on:
+    image: swo_ruby_apm_benchmark:latest
+    build:
+      context: ./benchmark
+      dockerfile: Dockerfile
+    container_name: swo_ruby_apm_benchmark_on-1
+    restart: "no"
+    ports:
+      - 8002:8002
+    environment:
+      # this AGENT_TOKEN_STG doesn't contain service name
+      SW_APM_SERVICE_KEY: ${AGENT_TOKEN_STG}:swo_ruby_apm_on
+      SW_APM_COLLECTOR: ${SW_APM_COLLECTOR_STG}
+      BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${GITHUB_TOKEN}
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  swo_ruby_apm_otlp_on:
+    image: swo_ruby_apm_benchmark:latest
+    build:
+      context: ./benchmark
+      dockerfile: Dockerfile
+    container_name: swo_ruby_apm_benchmark_otlp_on-1
+    restart: "no"
+    ports:
+      - 8004:8002
+    environment:
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT_STG}
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT_STG}
+      OTEL_EXPORTER_OTLP_TRACES_HEADERS: ${OTEL_EXPORTER_OTLP_TRACES_HEADERS_STG}
+      OTEL_EXPORTER_OTLP_METRICS_HEADERS: ${OTEL_EXPORTER_OTLP_METRICS_HEADERS_STG}
+      SW_APM_SERVICE_KEY: ${AGENT_TOKEN_STG}
+      SW_APM_COLLECTOR: ${SW_APM_COLLECTOR_STG}
+      OTEL_SERVICE_NAME: 'swo_ruby_apm_otlp_on'
+      BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${GITHUB_TOKEN}
+      SW_APM_REPORTER: file
+      OTLP_MODE_ON: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  swo_ruby_apm_off:
+    image: swo_ruby_apm_benchmark:latest
+    build:
+      context: ./benchmark
+      dockerfile: Dockerfile
+    container_name: swo_ruby_apm_benchmark_off-2
+    restart: "no"
+    ports:
+      - 8003:8002
+    environment:
+      SW_APM_SERVICE_KEY: ${AGENT_TOKEN_STG}:swo_ruby_apm_trace_off
+      SW_APM_COLLECTOR: ${SW_APM_COLLECTOR_STG}
+      BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${GITHUB_TOKEN}
+      # SW_APM_ENABLED: false   # if fully disable, it won't send anything to backend
+      EXPORT_TRACE_MODE_OFF: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  sample_app_holder:
+    image: ubuntu:latest
+    # command: tail -f /dev/null
+    command: >
+      sh -c "
+        apt-get update && apt-get install curl -y &&
+        while true; do
+          curl http://swo_ruby_apm_benchmark_on-1:8002;
+          sleep 1;
+          curl http://swo_ruby_apm_benchmark_otlp_on-1:8002;
+          sleep 1;
+          curl http://swo_ruby_apm_benchmark_off-2:8002;
+          sleep 5;
+        done
+      "
+    container_name: benchmark-app-holder
+    depends_on:
+      - swo_ruby_apm_on
+      - swo_ruby_apm_otlp_on
+      - swo_ruby_apm_off
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
