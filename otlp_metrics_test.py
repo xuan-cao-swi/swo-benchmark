@@ -19,6 +19,7 @@ resource = Resource.create(
     }
 )
 
+api_token = environ.get("API_TOKEN")
 exporter_console = ConsoleMetricExporter()
 exporter =  OTLPMetricExporter(
     endpoint="otel.collector.na-01.st-ssp.solarwinds.com:443",
@@ -47,7 +48,7 @@ metrics.set_meter_provider(meter_provider)
 otel_meter = meter_provider.get_meter("benchmark-always-sample")
 
 http_response_time_with_apm = otel_meter.create_histogram(
-    name="xuan.ruby.response.time.with_apm",
+    name="xuan.ruby.response.time.test_metrics",
     description="measures the duration of the inbound HTTP request",
     unit="ms")
 

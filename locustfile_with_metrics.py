@@ -23,7 +23,7 @@ resource = Resource.create(
     }
 )
 
-# api_token = environ.get("API_TOKEN")
+api_token = environ.get("API_TOKEN")
 exporter_console = ConsoleMetricExporter()
 exporter =  OTLPMetricExporter(
     endpoint="otel.collector.na-01.st-ssp.solarwinds.com:443",
