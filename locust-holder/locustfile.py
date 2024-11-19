@@ -51,8 +51,12 @@ meter_provider = MeterProvider(
 metrics.set_meter_provider(meter_provider)
 otel_meter = meter_provider.get_meter("benchmark-always-sample")
 
+metrics_name = environ.get("CUSTOM_METRICS_NAME")
+if metrics_name == None or metrics_name == '':
+    metrics_name = 'xuan.ruby.service.response.time' # let default to this one
+
 http_response_time = otel_meter.create_histogram(
-    name="xuan.ruby.service.response.time",
+    name=metrics_name,
     description="measures the duration of the inbound HTTP request",
     unit="ms")
 
