@@ -60,6 +60,16 @@ http_response_time = otel_meter.create_histogram(
     description="measures the duration of the inbound HTTP request",
     unit="ms")
 
+locust_wait_time_l = int(environ.get("LOCUST_WAIT_TIME_L"))
+locust_wait_time_h = int(environ.get("LOCUST_WAIT_TIME_H"))
+metrics_attribute_name = environ.get("METRICS_ATTRIBUTE_NAME")
+
+def debug_response_time(response_time, kw):
+    print("\n===========================================\n")
+    print(response_time)
+    for key, value in kw.items():
+        print(f"{key}: {value}")
+
 #  Locust does have an event hook called on_test_start. You can use it to execute code when a test starts. Here’s an example of how to use it:
 @events.test_start.add_listener
 def on_test_start(environment, **kwargs):
@@ -77,7 +87,7 @@ def on_test_start(environment, **kwargs):
     )
 
 class WebsiteOneUser(HttpUser):
-    wait_time = between(10, 10)
+    wait_time = between(locust_wait_time_l, locust_wait_time_h)
     @task
     def load_test_website_one(self):
         self.client.get("http://swo_ruby_apm_benchmark_on-1:8002/", name="with_apm")
@@ -86,32 +96,15 @@ class WebsiteOneUser(HttpUser):
 
     @events.request.add_listener
     def report_response_time(response_time, **kw):
-        # print("\n===========================================\n")
-        # print(response_time)
-        # for key, value in kw.items():
-        #     print(f"{key}: {value}")
 
         request_name = kw['name']
 
         if request_name == 'with_apm':
-            # http_response_time_with_apm.record(response_time, {"xuan-test": True, "name": "with_apm"})
-            http_response_time.record(response_time, attributes={"xuan-test": "with_apm"})
+            http_response_time.record(response_time, attributes={metrics_attribute_name: "with_apm"})
         elif request_name == 'with_otlp_apm':
-            # http_response_time_with_otlp_apm.record(response_time, {"xuan-test": True, "name": "with_otlp_apm"})
-            http_response_time.record(response_time, attributes={"xuan-test": "with_otlp_apm"})
+            http_response_time.record(response_time, attributes={metrics_attribute_name: "with_otlp_apm"})
         elif request_name == 'without_apm':
-            # http_response_time_without_apm.record(response_time, {"xuan-test": True, "name": "without_apm"})
-            http_response_time.record(response_time, attributes={"xuan-test": "without_apm"})
+            http_response_time.record(response_time, attributes={metrics_attribute_name: "without_apm"})
         else:
             print('request_name not found')
 
-# Locust doesn’t have a built-in function specifically named report_response_time, 
-# but you can track and report response times using Locust’s event hooks and the request event. 
-# Here’s an example of how you can log response times:
-
-# https://docs.locust.io/en/stable/running-without-web-ui.html
-# locust --headless -u 100 --run-time 60 --host http://0.0.0.0:8002 # default unit is seconds
-# locust --headless -u 100 --host http://0.0.0.0:8002
-
-# On multiple host
-# https://github.com/locustio/locust/issues/150

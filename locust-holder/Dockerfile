@@ -7,6 +7,7 @@ COPY locustfile.py .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# CMD ["tail", "-f", "/dev/null"]
-CMD ["locust", "--headless", "-u", "1", "--host", "http://0.0.0.0:8002"]
+CMD ["tail", "-f", "/dev/null"]
+
+# CMD ["locust", "--headless", "-u", "1", "--host", "http://0.0.0.0:8002"]
 # locust --headless -u 1 --host http://0.0.0.0:8002
