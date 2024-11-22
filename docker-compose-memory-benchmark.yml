@@ -1,3 +1,28 @@
+
+x-service-resource: &service-resource
+  limits:
+    cpus: '1'
+    memory: 512M
+  reservations:
+    cpus: '1'
+    memory: 512M
+
+x-load-resource: &load-resource
+  limits:
+    cpus: '2'
+    memory: 2G
+  reservations:
+    cpus: '2'
+    memory: 2G
+
+x-collector-resource: &collector-resource
+  limits:
+    cpus: '1'
+    memory: 1G
+  reservations:
+    cpus: '1'
+    memory: 1G
+
 services:
   swo_ruby_apm_on:
     image: swo_ruby_apm_benchmark:latest
@@ -14,13 +39,7 @@ services:
     volumes:
       - ./java-collector/server-grpc.crt:/var/app/learn-rails/server-grpc.crt
     deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
-          cpus: '1'
-          memory: 1G
+      resources: *service-resource
 
   swo_ruby_apm_otlp_on:
     image: swo_ruby_apm_benchmark:latest
@@ -32,22 +51,16 @@ services:
     ports:
       - 8004:8002
     environment:
-      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
-      - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otel-collector:4318/v1/metrics
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318 # this will serve for metrics as well
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector-benchmark:4318/v1/traces
+      - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otel-collector-benchmark:4318/v1/metrics
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-benchmark:4318 # this will serve for metrics as well
       - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true
       - SW_APM_REPORTER=file
       - OTLP_MODE_ON=true
     volumes:
       - ./java-collector/server-grpc.crt:/var/app/learn-rails/server-grpc.crt
     deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
-          cpus: '1'
-          memory: 1G
+      resources: *service-resource
 
   swo_ruby_apm_off:
     image: swo_ruby_apm_benchmark:latest
@@ -65,26 +78,28 @@ services:
     volumes:
       - ./java-collector/server-grpc.crt:/var/app/learn-rails/server-grpc.crt
     deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
-          cpus: '1'
-          memory: 1G
+      resources: *service-resource
 
-  sample_app_holder:
-    image: ubuntu:latest
-    command: tail -f /dev/null
-    container_name: benchmark-app-holder
+  # python container that can run locust endless
+  locust_app_holder:
+    image: locust_app_holder:latest
+    build:
+      context: ./locust-holder
+      dockerfile: Dockerfile
+    container_name: locust-app-holder
+    command: locust --headless -u 1 --host http://0.0.0.0:8002
+    environment:
+      - API_TOKEN=${API_TOKEN}
+      - CUSTOM_METRICS_NAME=${CUSTOM_METRICS_NAME}
+      - LOCUST_WAIT_TIME_L=10
+      - LOCUST_WAIT_TIME_H=10
+      - METRICS_ATTRIBUTE_NAME=xuan-test
+    depends_on:
+      - swo_ruby_apm_on
+      - swo_ruby_apm_otlp_on
+      - swo_ruby_apm_off
     deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
+      resources: *load-resource
 
   java-collector:
     image: "traceqa/test-collector:java-collector"
@@ -99,13 +114,7 @@ services:
       - 12224:12224
     command: java -jar apm-agent-test-collector.jar
     deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
-          cpus: '1'
-          memory: 1G
+      resources: *collector-resource
 
   otel-collector:
     image: otel/opentelemetry-collector:latest
@@ -116,17 +125,11 @@ services:
         max-size: 100m
         mode: non-blocking
         max-buffer-size: 5m
-    container_name: otel-collector
+    container_name: otel-collector-benchmark
     ports:
       - "4327:4317" # grpc (4327 is for 0.0.0.0:4327; 4317 is for otel-collector:4317)
       - "4328:4318" # http
     volumes:
       - ./otel-collector/otel-collector-config-2.yaml:/etc/otel-collector-config.yaml
     deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
-          cpus: '1'
-          memory: 1G
+      resources: *collector-resource

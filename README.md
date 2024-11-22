@@ -54,6 +54,7 @@ class WebsiteOneUser(HttpUser):
     @task
     def load_test_website_one(self):
         self.client.get("http://0.0.0.0:8002/", name="with_apm")
+        self.client.get("http://0.0.0.0:8004/", name="with_otlp_apm")
         self.client.get("http://0.0.0.0:8003/", name="without_apm")
 ```
 
@@ -66,6 +67,7 @@ class WebsiteOneUser(HttpUser):
     @task
     def load_test_website_one(self):
         self.client.get("http://swo_ruby_apm_benchmark_on-1:8002/", name="with_apm")
+        self.client.get("http://swo_ruby_apm_benchmark_otlp_on-1:8002/", name="with_otlp_apm")
         self.client.get("http://swo_ruby_apm_benchmark_off-2:8002/", name="without_apm")
 ```
 
@@ -78,3 +80,23 @@ Run the locust with web UI
 ```sh
 locust
 ```
+
+## SolarWinds Docker integration
+
+### Setup:
+Connect ec2 to solarwinds: https://documentation.solarwinds.com/en/success_center/observability/content/configure/configure-host.htm
+
+Setup docker monitor: https://documentation.solarwinds.com/en/success_center/observability/content/configure/configure-docker.htm
+
+benchmark dashboard: https://my.na-01.st-ssp.solarwinds.com/205939959869206528/entities/docker-daemons/e-1791561768517537792/overview?duration=3600
+
+Check if the solarwinds service is up:
+```
+service uamsclient status
+```
+
+
+## locustfile_with_metrics.py
+
+SERVICE_NAME
+metircs_endpoint

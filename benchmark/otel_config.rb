@@ -124,6 +124,41 @@ module SolarWindsAPM
           remote_parent_not_sampled: SolarWindsAPM::OpenTelemetry::SolarWindsSampler.new
         )
 
+      elsif ENV['EXPORT_TRACE_MODE_OFF'].to_s == 'true'
+
+        resolve_sampler
+        resolve_solarwinds_propagator
+        resolve_solarwinds_processor
+        resolve_response_propagator
+
+        print_config if SolarWindsAPM.logger.level.zero?
+
+        # resolve OTEL environmental variables
+        ENV['OTEL_TRACES_EXPORTER'] = 'none' if ENV['OTEL_TRACES_EXPORTER'].to_s.empty?
+        if ENV['OTEL_LOG_LEVEL'].to_s.empty?
+          log_level = (ENV['SW_APM_DEBUG_LEVEL'] || SolarWindsAPM::Config[:debug_level] || 3).to_i
+          ENV['OTEL_LOG_LEVEL'] = SolarWindsAPM::Config::SW_LOG_LEVEL_MAPPING.dig(log_level, :otel)
+        end
+
+        ::OpenTelemetry::SDK.configure { |c| c.use_all(@@config_map) }
+
+        validate_propagator(::OpenTelemetry.propagation.instance_variable_get(:@propagators))
+
+        return unless @@agent_enabled
+
+        # append our propagators
+        ::OpenTelemetry.propagation.instance_variable_get(:@propagators).append(@@config[:propagators])
+
+        # append our processors (with our exporter)
+        ::OpenTelemetry.tracer_provider.add_span_processor(@@config[:metrics_processor])
+
+        exporter = ::OpenTelemetry::SDK::Trace::Export::ConsoleSpanExporter.new
+        span_processor = ::OpenTelemetry::SDK::Trace::Export::BatchSpanProcessor.new(exporter)
+        ::OpenTelemetry.tracer_provider.add_span_processor(span_processor) # disable the exporting to backend ~= disable trace
+
+        # configure sampler afterwards
+        ::OpenTelemetry.tracer_provider.sampler = @@config[:sampler]
+
       else
 
         resolve_sampler
