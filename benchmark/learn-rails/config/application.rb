@@ -18,7 +18,7 @@ module LearnRailsApp
   end
 end
 
-if ENV['SW_APM_COLLECTOR'] =~ /java-collector:\d+/
+if ENV['SW_APM_COLLECTOR'] =~ /java-collector:\d+/ || ENV['SW_APM_COLLECTOR'] =~ /java-collector-2:\d+/
   require 'solarwinds_apm/oboe_init_options'
   SolarWindsAPM::OboeInitOptions.prepend(LearnRailsApp::JavaCollector) if defined?(SolarWindsAPM::OboeInitOptions)
 end

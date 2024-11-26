@@ -1,0 +1,2 @@
+### New settings format (double quotes human readable args)
+00000000-0000-0000-0000-000000000000	__DEFAULT__	DEFAULT_SAMPLE_RATE	SAMPLE_START,SAMPLE_THROUGH,SAMPLE_THROUGH_ALWAYS,SAMPLE_BUCKET_ENABLED,TRIGGER_TRACE,OVERRIDE	0	1000000	default	135	BucketCapacity="100.0",BucketRate="999.0",TriggerRelaxedBucketCapacity="7",TriggerRelaxedBucketRate="2",TriggerStrictBucketCapacity="6.5",TriggerStrictBucketRate="1.8",SignatureKey="8mZ98ZnZhhggcsUmdMbS"

@@ -14,7 +14,15 @@ gem 'uglifier', '>= 1.3.0'
 gem 'coffee-rails', '~> 4.2'
 gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.5'
-gem 'solarwinds_apm', require: false
+
+if ENV['SPECIAL_LIBOBOE'] == 'true'
+  puts "install from github package"
+  source 'https://rubygems.pkg.github.com/xuan-cao-swi' do
+    gem 'solarwinds_apm', '6.1.2', require: false
+  end
+else
+  gem 'solarwinds_apm', require: false
+end
 
 gem 'opentelemetry-exporter-otlp', '0.29.0'
 gem 'opentelemetry-metrics-sdk', '0.2.0'
