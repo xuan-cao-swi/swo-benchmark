@@ -17,3 +17,8 @@ locust --headless -u 100 --host http://0.0.0.0:8002
 
 On multiple host
 https://github.com/locustio/locust/issues/150
+
+
+## Get other docker stats
+
+curl --unix-socket /var/run/docker.sock http://host.docker.internal/containers/174bcbe44471/stats?stream=false

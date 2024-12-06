@@ -128,6 +128,8 @@ services:
       - java-collector
       - java-collector-2
       - otel-collector
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     deploy:
       resources: *load-resource
 

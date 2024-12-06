@@ -18,7 +18,7 @@ gem 'jbuilder', '~> 2.5'
 if ENV['SPECIAL_LIBOBOE'] == 'true'
   puts "install from github package"
   source 'https://rubygems.pkg.github.com/xuan-cao-swi' do
-    gem 'solarwinds_apm', '6.1.2', require: false
+    gem 'solarwinds_apm', '6.2.1', require: false
   end
 else
   gem 'solarwinds_apm', require: false

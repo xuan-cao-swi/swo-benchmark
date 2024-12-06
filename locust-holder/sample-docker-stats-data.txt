@@ -1,0 +1,91 @@
+data = {
+    'read': '2024-12-06T15:33:45.330188375Z',
+    'preread': '2024-12-06T15:33:44.324505375Z',
+    'pids_stats': {'current': 11, 'limit': 18446744073709551615},
+    'blkio_stats': {
+        'io_service_bytes_recursive': [
+            {'major': 254, 'minor': 0, 'op': 'read', 'value': 0},
+            {'major': 254, 'minor': 0, 'op': 'write', 'value': 16384}
+        ],
+        'io_serviced_recursive': None,
+        'io_queue_recursive': None,
+        'io_service_time_recursive': None,
+        'io_wait_time_recursive': None,
+        'io_merged_recursive': None,
+        'io_time_recursive': None,
+        'sectors_recursive': None
+    },
+    'num_procs': 0,
+    'storage_stats': {},
+    'cpu_stats': {
+        'cpu_usage': {
+            'total_usage': 2422611000,
+            'usage_in_kernelmode': 488206000,
+            'usage_in_usermode': 1934404000
+        },
+        'system_cpu_usage': 29916880000000,
+        'online_cpus': 10,
+        'throttling_data': {'periods': 929, 'throttled_periods': 0, 'throttled_time': 0}
+    },
+    'precpu_stats': {
+        'cpu_usage': {
+            'total_usage': 2422380000,
+            'usage_in_kernelmode': 488206000,
+            'usage_in_usermode': 1934174000
+        },
+        'system_cpu_usage': 29906810000000,
+        'online_cpus': 10,
+        'throttling_data': {'periods': 929, 'throttled_periods': 0, 'throttled_time': 0}
+    },
+    'memory_stats': {
+        'usage': 110497792,
+        'stats': {
+            'active_anon': 98975744,
+            'active_file': 0,
+            'anon': 98975744,
+            'anon_thp': 0,
+            'file': 12288,
+            'file_dirty': 0,
+            'file_mapped': 0,
+            'file_writeback': 0,
+            'inactive_anon': 0,
+            'inactive_file': 12288,
+            'kernel_stack': 180224,
+            'pgactivate': 0,
+            'pgdeactivate': 0,
+            'pgfault': 35561,
+            'pglazyfree': 0,
+            'pglazyfreed': 0,
+            'pgmajfault': 0,
+            'pgrefill': 0,
+            'pgscan': 0,
+            'pgsteal': 0,
+            'shmem': 0,
+            'slab': 10791240,
+            'slab_reclaimable': 10317904,
+            'slab_unreclaimable': 473336,
+            'sock': 0,
+            'thp_collapse_alloc': 0,
+            'thp_fault_alloc': 1,
+            'unevictable': 0,
+            'workingset_activate': 0,
+            'workingset_nodereclaim': 0,
+            'workingset_refault': 0
+        },
+        'limit': 536870912
+    },
+    'name':'/swo_ruby_apm_benchmark_off-2',
+    "id": "eaadba51cb2cd97276cc922afef493b70fac00389a94c4052c5a2b6842f7fb68",
+    "networks": {
+        "eth0": {
+            "rx_bytes":1878, 
+            "rx_packets":21, 
+            "rx_errors":0, 
+            "rx_dropped":0, 
+            "tx_bytes":0, 
+            "tx_packets":0, 
+            "tx_errors":0, 
+            "tx_dropped":0
+        }
+    }
+}
