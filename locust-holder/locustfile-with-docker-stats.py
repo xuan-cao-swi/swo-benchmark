@@ -97,7 +97,7 @@ def send_stats(stats, options={}):
     cpu_usage_percentage = (total_cpu_usage / system_cpu_usage) * 100
 
     docker_memory.record(round(memory_usage_mb, 2), attributes={metrics_attribute_name: options['container_name']})
-    docker_cpu.record(round(memory_usage_mb, 3), attributes={metrics_attribute_name: options['container_name']})
+    docker_cpu.record(round(cpu_usage_percentage, 4), attributes={metrics_attribute_name: options['container_name']})
 
 # Define the background job
 def background_job():
