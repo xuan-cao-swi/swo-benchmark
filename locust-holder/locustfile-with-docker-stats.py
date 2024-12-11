@@ -26,6 +26,7 @@ docker_socket_path = "http+unix://%2Fvar%2Frun%2Fdocker.sock"
 apm_off_url     = f"{docker_socket_path}/containers/swo_ruby_apm_benchmark_off-2/stats?stream=false"
 apm_on_url      = f"{docker_socket_path}/containers/swo_ruby_apm_benchmark_on-1/stats?stream=false"
 apm_otlp_on_url = f"{docker_socket_path}/containers/swo_ruby_apm_benchmark_otlp_on-1/stats?stream=false"
+apm_special_url = f"{docker_socket_path}/containers/swo_ruby_apm_benchmark_on_special_liboboe-1/stats?stream=false"
 
 general_session = requests_unixsocket.Session()
 
@@ -117,6 +118,11 @@ def background_job():
             response.raise_for_status()
             stats = response.json()
             send_stats(stats, {'container_name': 'with_otlp_apm'})
+
+            response = general_session.get(apm_special_url)
+            response.raise_for_status()
+            stats = response.json()
+            send_stats(stats, {'container_name': 'with_special_apm'})
 
         except requests.RequestException as e:
             print(f"Error fetching stats: {e}")
