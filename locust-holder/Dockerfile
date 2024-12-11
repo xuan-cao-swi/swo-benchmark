@@ -9,6 +9,8 @@ COPY locustfile.py .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN pip install requests_unixsocket2
+
 CMD ["tail", "-f", "/dev/null"]
 
 # CMD ["locust", "--headless", "-u", "1", "--host", "http://0.0.0.0:8002"]

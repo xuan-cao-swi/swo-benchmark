@@ -39,18 +39,13 @@ resource = Resource.create(
 )
 
 api_token = environ.get("API_TOKEN")
-exporter_console = ConsoleMetricExporter()
+
 exporter =  OTLPMetricExporter(
     endpoint="otel.collector.na-01.st-ssp.solarwinds.com:443",
     insecure=False,
     headers={
         "authorization": f"Bearer {api_token}"
     }
-)
-
-reader_console = PeriodicExportingMetricReader(
-    exporter_console,
-    export_interval_millis=5_000,
 )
 
 reader = PeriodicExportingMetricReader(
@@ -60,7 +55,7 @@ reader = PeriodicExportingMetricReader(
 
 meter_provider = MeterProvider(
     resource=resource,
-    metric_readers=[reader_console, reader],
+    metric_readers=[reader],
 )
 
 metrics.set_meter_provider(meter_provider)
@@ -151,6 +146,7 @@ def on_test_start(environment, **kwargs):
         callbacks=[consume_requests_per_second]
     )
 
+# locust --headless -u 1 --host http://0.0.0.0:8002
 class WebsiteOneUser(HttpUser):
     wait_time = between(locust_wait_time_l, locust_wait_time_h)
     @task
