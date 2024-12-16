@@ -124,6 +124,8 @@ module SolarWindsAPM
           remote_parent_not_sampled: SolarWindsAPM::OpenTelemetry::SolarWindsSampler.new
         )
 
+        puts "::OpenTelemetry.tracer_provider: #{::OpenTelemetry.tracer_provider.inspect}"
+
       elsif ENV['EXPORT_TRACE_MODE_OFF'].to_s == 'true'
 
         resolve_sampler

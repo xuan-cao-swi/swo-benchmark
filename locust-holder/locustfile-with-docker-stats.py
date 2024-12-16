@@ -122,7 +122,7 @@ def background_job():
         except requests.RequestException as e:
             print(f"Error fetching stats: {e}")
 
-        time.sleep(10)
+        time.sleep(30)
 
 def debug_response_time(response_time, kw):
     print("\n===========================================\n")
@@ -147,14 +147,15 @@ def on_test_start(environment, **kwargs):
     )
 
 # locust --headless -u 1 --host http://0.0.0.0:8002
+# Locust uses requests.Session under the hood for HTTP requests, which enables connection pooling and reuses connections by default.
 class WebsiteOneUser(HttpUser):
     wait_time = between(locust_wait_time_l, locust_wait_time_h)
     @task
     def load_test_website_one(self):
-        self.client.get("http://swo_ruby_apm_benchmark_on-1:8002/", name="with_apm")
-        self.client.get("http://swo_ruby_apm_benchmark_otlp_on-1:8002/", name="with_otlp_apm")
-        self.client.get("http://swo_ruby_apm_benchmark_off-2:8002/", name="without_apm")
-        self.client.get("http://swo_ruby_apm_benchmark_on_special_liboboe-1:8002/", name="with_special_apm")
+        self.client.get("http://swo_ruby_apm_benchmark_on-1:8002/", name="with_apm", headers={"Connection": "close"})
+        self.client.get("http://swo_ruby_apm_benchmark_otlp_on-1:8002/", name="with_otlp_apm", headers={"Connection": "close"})
+        self.client.get("http://swo_ruby_apm_benchmark_off-2:8002/", name="without_apm", headers={"Connection": "close"})
+        self.client.get("http://swo_ruby_apm_benchmark_on_special_liboboe-1:8002/", name="with_special_apm", headers={"Connection": "close"})
 
     @events.request.add_listener
     def report_response_time(response_time, **kw):

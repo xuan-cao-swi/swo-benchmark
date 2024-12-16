@@ -22,3 +22,7 @@ https://github.com/locustio/locust/issues/150
 ## Get other docker stats
 
 curl --unix-socket /var/run/docker.sock http://host.docker.internal/containers/174bcbe44471/stats?stream=false
+
+## Checklist
+
+1. all trace should have entry span with `"http.route":"/` (`Name           : GET /` for otlp proto)

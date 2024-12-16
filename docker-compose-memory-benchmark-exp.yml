@@ -81,6 +81,7 @@ services:
       - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otel-collector-benchmark:4318/v1/metrics
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-benchmark:4318 # this will serve for metrics as well
       - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true
+      - OTEL_EXPORTER_OTLP_METRICS_INSECURE=true
       - SW_APM_REPORTER=file
       - OTLP_MODE_ON=true
     volumes:
@@ -113,12 +114,12 @@ services:
       context: ./locust-holder
       dockerfile: Dockerfile
     container_name: locust-app-holder
-    # command: locust --headless -u 1 --host http://0.0.0.0:8002
+    # command: locust --headless -u 1 --host http://0.0.0.0:8002 --processes 4
     environment:
       - API_TOKEN=${API_TOKEN}
       - CUSTOM_METRICS_NAME=${CUSTOM_METRICS_NAME}
-      - LOCUST_WAIT_TIME_L=10
-      - LOCUST_WAIT_TIME_H=10
+      - LOCUST_WAIT_TIME_L=30
+      - LOCUST_WAIT_TIME_H=60
       - METRICS_ATTRIBUTE_NAME=xuan-test
     depends_on:
       - swo_ruby_apm_on

@@ -93,7 +93,7 @@ class WebsiteOneUser(HttpUser):
         self.client.get("http://swo_ruby_apm_benchmark_on-1:8002/", name="with_apm")
         self.client.get("http://swo_ruby_apm_benchmark_otlp_on-1:8002/", name="with_otlp_apm")
         self.client.get("http://swo_ruby_apm_benchmark_off-2:8002/", name="without_apm")
-        self.client.get("http://swo_ruby_apm_benchmark_on_special_liboboe-1:8002/", name="with_special_apm")
+        # self.client.get("http://swo_ruby_apm_benchmark_on_special_liboboe-1:8002/", name="with_special_apm")
 
     @events.request.add_listener
     def report_response_time(response_time, **kw):
@@ -106,8 +106,8 @@ class WebsiteOneUser(HttpUser):
             http_response_time.record(response_time, attributes={metrics_attribute_name: "with_otlp_apm"})
         elif request_name == 'without_apm':
             http_response_time.record(response_time, attributes={metrics_attribute_name: "without_apm"})
-        elif request_name == 'with_special_apm':
-            http_response_time.record(response_time, attributes={metrics_attribute_name: "with_special_apm"})
+        # elif request_name == 'with_special_apm':
+        #     http_response_time.record(response_time, attributes={metrics_attribute_name: "with_special_apm"})
         else:
             print('request_name not found')
 
