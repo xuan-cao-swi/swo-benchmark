@@ -142,6 +142,8 @@ module SolarWindsAPM
           ENV['OTEL_LOG_LEVEL'] = SolarWindsAPM::Config::SW_LOG_LEVEL_MAPPING.dig(log_level, :otel)
         end
 
+        ENV['OTEL_RESOURCE_ATTRIBUTES'] = "sw.apm.version=#{SolarWindsAPM::Version::STRING},sw.data.module=apm,service.name=#{ENV['OTEL_SERVICE_NAME'] || ENV.fetch('AWS_LAMBDA_FUNCTION_NAME', nil)}," + ENV['OTEL_RESOURCE_ATTRIBUTES'].to_s
+
         ::OpenTelemetry::SDK.configure { |c| c.use_all(@@config_map) }
 
         validate_propagator(::OpenTelemetry.propagation.instance_variable_get(:@propagators))
@@ -176,6 +178,8 @@ module SolarWindsAPM
           log_level = (ENV['SW_APM_DEBUG_LEVEL'] || SolarWindsAPM::Config[:debug_level] || 3).to_i
           ENV['OTEL_LOG_LEVEL'] = SolarWindsAPM::Config::SW_LOG_LEVEL_MAPPING.dig(log_level, :otel)
         end
+
+        ENV['OTEL_RESOURCE_ATTRIBUTES'] = "sw.apm.version=#{SolarWindsAPM::Version::STRING},sw.data.module=apm,service.name=#{ENV['OTEL_SERVICE_NAME'] || ENV.fetch('AWS_LAMBDA_FUNCTION_NAME', nil)}," + ENV['OTEL_RESOURCE_ATTRIBUTES'].to_s
 
         ::OpenTelemetry::SDK.configure { |c| c.use_all(@@config_map) }
 

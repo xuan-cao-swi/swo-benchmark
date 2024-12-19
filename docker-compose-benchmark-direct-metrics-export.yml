@@ -1,0 +1,169 @@
+x-service-resource: &service-resource
+  limits:
+    cpus: '1'
+    memory: 512M
+  reservations:
+    cpus: '1'
+    memory: 512M
+
+x-load-resource: &load-resource
+  limits:
+    cpus: '2'
+    memory: 2G
+  reservations:
+    cpus: '2'
+    memory: 2G
+
+x-collector-resource: &collector-resource
+  limits:
+    cpus: '1'
+    memory: 1G
+  reservations:
+    cpus: '1'
+    memory: 1G
+
+services:
+  swo_ruby_apm_on:
+    image: swo_ruby_apm_benchmark:latest
+    build:
+      context: ./benchmark
+      dockerfile: Dockerfile
+    container_name: swo_ruby_apm_benchmark_on-1
+    restart: "no"
+    # command: tail -f /dev/null
+    ports:
+      - 8002:8002
+    environment:
+      # - SW_APM_COLLECTOR=java-collector:12224
+      # - SW_APM_TRUSTEDPATH=/var/app/learn-rails/server-grpc.crt
+      # separate line
+      - SW_APM_COLLECTOR=${SW_APM_COLLECTOR_STG}
+      - SW_APM_SERVICE_KEY=${AGENT_TOKEN_STG}
+      # separate line
+      - OTEL_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
+      - OTEL_HEADERS=${OTEL_EXPORTER_OTLP_TRACES_HEADERS_STG}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
+      - AGENT_TYPE=apm-on
+    volumes:
+      - ./java-collector/server-grpc.crt:/var/app/learn-rails/server-grpc.crt
+      # - ./benchmark/learn-rails:/var/app/learn-rails
+    deploy:
+      resources: *service-resource
+    depends_on:
+      - java-collector
+
+  swo_ruby_apm_otlp_on:
+    image: swo_ruby_apm_benchmark:latest
+    build:
+      context: ./benchmark
+      dockerfile: Dockerfile
+    container_name: swo_ruby_apm_benchmark_otlp_on-1
+    restart: "no"
+    # command: tail -f /dev/null
+    ports:
+      - 8004:8002
+    environment:
+      # - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector-benchmark:4318/v1/traces
+      # - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otel-collector-benchmark:4318/v1/metrics
+      # - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-benchmark:4318 # this will serve for metrics as well
+      # - OTEL_EXPORTER_OTLP_TRACES_INSECURE=true
+      - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT_STG}
+      - OTEL_EXPORTER_OTLP_METRICS_HEADERS=${OTEL_EXPORTER_OTLP_METRICS_HEADERS_STG}
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT_STG}
+      - OTEL_EXPORTER_OTLP_TRACES_HEADERS=${OTEL_EXPORTER_OTLP_TRACES_HEADERS_STG}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
+      - SW_APM_REPORTER=file
+      - OTLP_MODE_ON=true
+      - AGENT_TYPE=apm-otlp-on
+      - OTEL_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
+      - OTEL_HEADERS=${OTEL_EXPORTER_OTLP_TRACES_HEADERS_STG}
+    volumes:
+      - ./java-collector/server-grpc.crt:/var/app/learn-rails/server-grpc.crt
+      # - ./benchmark/learn-rails:/var/app/learn-rails
+    deploy:
+      resources: *service-resource
+    depends_on:
+      - otel-collector
+
+  swo_ruby_apm_off:
+    image: swo_ruby_apm_benchmark:latest
+    build:
+      context: ./benchmark
+      dockerfile: Dockerfile
+    container_name: swo_ruby_apm_benchmark_off-2
+    restart: "no"
+    # command: tail -f /dev/null
+    ports:
+      - 8003:8002
+    environment:
+      - SW_APM_ENABLED=false
+      - OTEL_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
+      - OTEL_HEADERS=${OTEL_EXPORTER_OTLP_TRACES_HEADERS_STG}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
+      - AGENT_TYPE=apm-off
+    volumes:
+      - ./java-collector/server-grpc.crt:/var/app/learn-rails/server-grpc.crt
+      # - ./benchmark/learn-rails:/var/app/learn-rails
+    deploy:
+      resources: *service-resource
+    depends_on:
+      - java-collector
+
+  # python container that can run locust endless
+  locust_app_holder:
+    image: locust_app_holder:latest
+    build:
+      context: ./locust-holder
+      dockerfile: Dockerfile
+    container_name: locust-app-holder
+    # command: locust --headless -u 1 --host http://0.0.0.0:8002
+    environment:
+      - API_TOKEN=${API_TOKEN}
+      - CUSTOM_METRICS_NAME=${CUSTOM_METRICS_NAME}
+      - LOCUST_WAIT_TIME_L=10
+      - LOCUST_WAIT_TIME_H=20
+      - METRICS_ATTRIBUTE_NAME=xuan-test
+    depends_on:
+      - java-collector
+      - otel-collector
+      - swo_ruby_apm_on
+      - swo_ruby_apm_otlp_on
+      - swo_ruby_apm_off
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      resources: *load-resource
+
+  java-collector:
+    image: "traceqa/test-collector:java-collector"
+    container_name: java-collector
+    volumes:
+      - ./java-collector/settings-benchmark.db:/settings.db
+      - ./java-collector/server-grpc.pem:/server-grpc.pem
+      - ./java-collector/server-grpc.crt:/server-grpc.crt
+      - ./java-collector/config-proxy-ao-benchmark.json:/config.json
+    ports:
+      - 8181:8181
+      - 12224:12224
+    command: java -jar apm-agent-test-collector.jar
+    deploy:
+      resources: *collector-resource
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    logging:
+      options:
+        max-file: '1'
+        max-size: 100m
+        mode: non-blocking
+        max-buffer-size: 5m
+    container_name: otel-collector-benchmark
+    ports:
+      - "4327:4317" # grpc (4327 is for 0.0.0.0:4327; 4317 is for otel-collector:4317)
+      - "4328:4318" # http
+    volumes:
+      - ./otel-collector/otel-collector-config-2.yaml:/etc/otel-collector-config.yaml
+    deploy:
+      resources: *collector-resource
+
