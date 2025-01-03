@@ -124,6 +124,8 @@ module SolarWindsAPM
           remote_parent_not_sampled: SolarWindsAPM::OpenTelemetry::SolarWindsSampler.new
         )
 
+        puts "::OpenTelemetry.tracer_provider: #{::OpenTelemetry.tracer_provider.inspect}"
+
       elsif ENV['EXPORT_TRACE_MODE_OFF'].to_s == 'true'
 
         resolve_sampler
@@ -139,6 +141,8 @@ module SolarWindsAPM
           log_level = (ENV['SW_APM_DEBUG_LEVEL'] || SolarWindsAPM::Config[:debug_level] || 3).to_i
           ENV['OTEL_LOG_LEVEL'] = SolarWindsAPM::Config::SW_LOG_LEVEL_MAPPING.dig(log_level, :otel)
         end
+
+        ENV['OTEL_RESOURCE_ATTRIBUTES'] = "sw.apm.version=#{SolarWindsAPM::Version::STRING},sw.data.module=apm,service.name=#{ENV['OTEL_SERVICE_NAME'] || ENV.fetch('AWS_LAMBDA_FUNCTION_NAME', nil)}," + ENV['OTEL_RESOURCE_ATTRIBUTES'].to_s
 
         ::OpenTelemetry::SDK.configure { |c| c.use_all(@@config_map) }
 
@@ -174,6 +178,8 @@ module SolarWindsAPM
           log_level = (ENV['SW_APM_DEBUG_LEVEL'] || SolarWindsAPM::Config[:debug_level] || 3).to_i
           ENV['OTEL_LOG_LEVEL'] = SolarWindsAPM::Config::SW_LOG_LEVEL_MAPPING.dig(log_level, :otel)
         end
+
+        ENV['OTEL_RESOURCE_ATTRIBUTES'] = "sw.apm.version=#{SolarWindsAPM::Version::STRING},sw.data.module=apm,service.name=#{ENV['OTEL_SERVICE_NAME'] || ENV.fetch('AWS_LAMBDA_FUNCTION_NAME', nil)}," + ENV['OTEL_RESOURCE_ATTRIBUTES'].to_s
 
         ::OpenTelemetry::SDK.configure { |c| c.use_all(@@config_map) }
 

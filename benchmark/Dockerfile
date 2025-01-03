@@ -26,10 +26,21 @@ COPY . /var/app/
 
 WORKDIR /var/app/learn-rails
 
+# by enabling this, the special/experimental liboboe will be installed for benchmarking
+ARG SPECIAL_LIBOBOE
+ARG OBOE_ENV
+ARG BUNDLE_RUBYGEMS__PKG__GITHUB__COM
+
 RUN bundle install
 
+RUN gem list | grep solarwinds_apm | awk -F'[()]' '{print $2}' > /solarwinds_version.txt
+
+RUN version=$(cat /solarwinds_version.txt) && \
+    cp /var/app/otel_config.rb /usr/local/bundle/gems/solarwinds_apm-${version}/lib/solarwinds_apm/
+
 # otel_config.rb branch off either OTLP_MODE_ON true or false
-COPY otel_config.rb /usr/local/bundle/gems/solarwinds_apm-6.1.0/lib/solarwinds_apm/
+# COPY otel_config.rb /usr/local/bundle/gems/solarwinds_apm-6.1.0/lib/solarwinds_apm/
+# COPY otel_config.rb /usr/local/bundle/gems/solarwinds_apm-6.1.0/lib/solarwinds_apm/
 
 EXPOSE 8002
 
